@@ -49,22 +49,32 @@ Define some model to estimate.
         solver = IIS(model)
         ensemble = solver.estimate(size=500)
     
-- Plotting functions to check convergence
+- A number of methods to analyze the results
 
-        from iis.diagnostic import Diagnostic, scatter_matrix
+        ensemble.to_dataframe()     # convert to pandas dataframe
+        solver.to_panel()           # convert to pandas panel
+        solver.plot_history()
+        ensemble.scatter_matrix()
 
-        # distribution and correlation of results
-        scatter_matrix(ensemble)
-
-        # check convergence history
-        diag = Diagnostic(solver.history)
-        diag.plot_series_state()
 
 Check in-line help for more option on `iis.IIS.estimate`, `iis.Model` and so on.
+The concept of IIS is explained in [notebooks/iis_concept.ipynb](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb)
+and an example can be found in [notebooks/examples.ipynb](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb)
 
+
+Dependencies
+============
+
+Required
+--------
+numpy (tested with 1.9.2) 
+scipy (tested with 0.15.1)
+
+Optional
+--------
+pandas (plotting only) (tested with 0.15.2)
 
 Install
 =======
-From within the cloned repository:
 
-        python setup.py install
+python setup.py install
