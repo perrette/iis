@@ -1,24 +1,28 @@
 IIS
 ===
-Iterative Importance Sampling (IIS) for bayesian parameter estimation of physical models
+__Iterative Importance Sampling (IIS) for bayesian parameter estimation of physical models__
 
-The current version of this package is based on Annan and 
-Hargreave (2010), DOI: 10.1016/j.ocemod.2010.02.003
-
-See and download notebooks for [IIS concept](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb) and [examples](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb).
-
-This module has some bearing with pymc but focuses on relatively computationally-
+Background
+----------
+This module has some bearing with [pymc](https://github.com/pymc-devs/pymc) 
+but focuses on relatively computationally-
 expensive physical models. It is based on Gaussian approximation of parameter
 distribution and resulting model state, but is more robust than the Ensemble 
-Kalman Filter with respect to deviations from non-linearity (Annan and Hargreave, 2010)
+Kalman Filter with respect to deviations from non-linearity ([Annan and Hargreave, 2010](http://doi.org/10.1016/j.ocemod.2010.02.003))
 In the best cases, it allows convergence of a 50 to 500-member model ensemble
-within a few 10s of iterations (see notebook examples). 
+within a few 10s of iterations (e.g. notebooks  [here](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb)
+and [there](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb)). 
 This is much faster than classical Monte Carlo Markov Chains, 
 which are more general (not limited to Gaussian cases) but require 10,000s of 
 iterations. Even without perfect, steady convergence of the posterior PDF 
 (say, non-linear model with ensemble limited to 50 members), 
 the IIS method can help "tuning" the model ensemble to within the range of 
 observations, which is not always a trivial task "by hand".
+
+The concept is explained in more details [as a notebook](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb) and in the paper from [Annan and Hargreaves (2010)](http://doi.org/10.1016/j.ocemod.2010.02.003), from which this package took its inspiration from.
+
+Getting started
+---------------
 
 Define some model to estimate.
 
@@ -67,10 +71,12 @@ Dependencies
 ------------
 
 - Required:
+ 
         - numpy (tested with 1.9.2) 
         - scipy (tested with 0.15.1)
 
 - Optional:
+
         - pandas (plotting only) (tested with 0.15.2)
 
 Install
