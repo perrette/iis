@@ -120,7 +120,7 @@ def traceback_ids(ensembles, ids=None):
         i -= 1
     return trace_ids
 
-def plot_iterations(ensembles, params_ids=None, state_ids=None, quantiles=(0.5, 0.95, 0.05, 0.16, 0.84), overlay_dists=True, **kwargs):
+def plot_history(ensembles, params_ids=None, state_ids=None, quantiles=(0.5, 0.95, 0.05, 0.16, 0.84), overlay_dists=True, **kwargs):
     """ Plot convergence of the ensemble
 
     Parameters
@@ -145,9 +145,9 @@ def plot_iterations(ensembles, params_ids=None, state_ids=None, quantiles=(0.5, 
         dists = None
 
     # over = self.model.likelihood.ppf(np.array(pct)/100.) # quantiles
-    return _plot_iterations(panel, dists=dists, **kwargs)
+    return _plot_history(panel, dists=dists, **kwargs)
 
-def _plot_iterations(panel, dists=None, alpha=0.3, color='blue', linestyle='-', linewidth=2, **kwargs):
+def _plot_history(panel, dists=None, alpha=0.3, color='blue', linestyle='-', linewidth=2, **kwargs):
     """ Plot convergence of a series
 
     Parameters
@@ -227,7 +227,7 @@ def dist_quantiles(model, params_ids, state_ids, quantiles):
 
     return dists
 
-def plot_iterations_diag(ensembles):
+def plot_history_diag(ensembles):
     """ plot things like epsilon and so on
     """
     epsilon = np.array([e.analysis['epsilon'] for e in ensembles])

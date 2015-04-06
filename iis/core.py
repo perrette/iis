@@ -715,7 +715,7 @@ doing the analysis to get meaningful results")
         return history_to_panel(self.history, params_ids, state_ids, quantiles)
 
     def plot_history(self, params_ids=None, state_ids=None, quantiles=(0.5, 0.95, 0.05, 0.16, 0.84), overlay_dists=False, **kwargs):
-        """ Plot convergence of the ensemble (wrapper around `iis.diagnostic.plot_iterations`)
+        """ Plot convergence of the ensemble (wrapper around `iis.diagnostic.plot_history`)
 
         Parameters
         ----------
@@ -734,8 +734,8 @@ doing the analysis to get meaningful results")
         --------
         `iis.Ensemble.scatter_matrix`
         """
-        from .diagnostic import plot_iterations
-        return plot_iterations(self.history, params_ids, state_ids, quantiles, overlay_dists, **kwargs)
+        from .diagnostic import plot_history
+        return plot_history(self.history, params_ids, state_ids, quantiles, overlay_dists, **kwargs)
 
 # def main():
 #     pass
