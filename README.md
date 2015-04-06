@@ -19,19 +19,19 @@ observations, which is not always a trivial task "by hand".
 
 Define some model to estimate.
 
-- a forward function to integrate the model:
+- a forward function to integrate the model, here 2-param into scalar:
 
         def mymodel(params):
             """User-defined model with two parameters
 
             Parameters
             ----------
-            params : numpy.ndarray 1-D
+            params : 1-D numpy.ndarray of size 2
 
             Returns
             -------
             state : float
-                return value (could also be an array)
+                return value
             """
             return params[0] + params[1]*2
 
@@ -49,23 +49,22 @@ Define some model to estimate.
         solver = IIS(model)
         ensemble = solver.estimate(size=500)
     
-- Check convergence
+- Plotting functions to check convergence
 
-        from iis.diagnostic import Diagnostic, plot_ensemble
+        from iis.diagnostic import Diagnostic, scatter_matrix
 
-        # posterior distribution for model state
-        plot_ensemble(ensemble, field='state') 
+        # distribution and correlation of results
+        scatter_matrix(ensemble)
 
-        # posterior distribution for model params
-        plot_ensemble(ensemble, field='params', dim=0) 
-        plot_ensemble(ensemble, field='params', dim=1)
-
-        # also check convergence history
+        # check convergence history
         diag = Diagnostic(solver.history)
         diag.plot_series_state()
+
+Check in-line help for more option on `iis.IIS.estimate`, `iis.Model` and so on.
 
 
 Install
 =======
 From within the cloned repository:
+
         python setup.py install
