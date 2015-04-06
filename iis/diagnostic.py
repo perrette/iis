@@ -116,6 +116,9 @@ def radviz(ensemble, categories, params_ids=None, state_ids=None, **kwargs):
     df = ensemble_to_df(ensemble, params_ids, state_ids, categories=categories)
     return pdplt.radviz(df, '_CatName', **kwargs)
 
+########################################################
+# Plot distributions with overlaids likelihood and prior
+########################################################
 def plot_distribution(ensemble, field="state", dim=0):
     """ Plot ensemble distributions
 
@@ -167,6 +170,9 @@ def plot_distribution(ensemble, field="state", dim=0):
     # fig.set_figwidth(17)
     ax.set_xlim([mi, ma])
 
+##########################################
+# Plot convergence of the ensemble
+##########################################
 class Diagnostic(object):
     """ Class to make diagnostics from the historiy field for the Solver class
     """
@@ -181,6 +187,23 @@ class Diagnostic(object):
         self.labels_state = self.model.labels_state
         self.labels_params = self.model.labels_params
 
+    # plot distribution of final state
+    def plot_distribution(self, field="state", dim=0, i=-1):
+        return plot_distribution(self.history[i], field, dim)
+
+    def scatter_matrix(self, i=-1, **kwargs):
+        return scatter_matrix(self.history[i], **kwargs)
+
+    def parallel_coordinates(self, categories, i=-1, **kwargs):
+        return parallel_coordinates(self.history[i], categories, **kwargs)
+
+    def radviz(self, categories, i=-1, **kwargs):
+        return radviz(self.history[i], categories, **kwargs)
+
+    def andrews_curves(self, categories, i=-1, **kwargs):
+        return andrews_curves(self.history[i], categories, **kwargs)
+
+    # plot time series
     def get_dimensions(self):
         """ dimensions of the problem (i, n, p, m)
         i: number of iterations
@@ -190,33 +213,6 @@ class Diagnostic(object):
         """
         ens0 = self.history[0]
         return (len(self.history), ens0.size, self.model.params.size, self.model.state.size)
-
-    def get_params(self, param_ids=None, trace_ids=None):
-        """Series of params
-
-        Parameters
-        ----------
-        param_ids: 1-D int array, optional
-            subset of parameters to retrieve (default: all)
-        trace_ids: 2-D int array, optional ( iter x ids )
-            mapping of the particle at the last iteration (or before) 
-            onto the ensembles of previous iterations.
-            See traceback_ids.
-
-        Returns
-        -------
-        3-D ndarray of params ( param x iter x ensemble)
-        """
-        ni, n, p, m = self.get_dimensions()
-        if param_ids is None: # params' index
-            param_ids = np.arange(p, dtype=int)
-        if trace_ids is None: # ensemble's index
-            # by default just assumes the particles remain the same...
-            trace_ids = np.arange(n, dtype=int)[np.newaxis, :].repeat(ni, axis=1)
-        params = np.empty((len(param_ids), trace_ids.shape[0], trace_ids.shape[1])) 
-        for i in xrange(trace_ids.shape[0]):
-            params[:,i,:] = self.history[i].params[trace_ids[i], param_ids].T
-        return params
 
     def get_params_q(self, q):
         " series of params' quantiles: param x iter x quantiles "
@@ -296,10 +292,7 @@ class Diagnostic(object):
                 ax.set_xlim([mi, ma])
             ax.legend(frameon=False)
 
-    def plot_distribution(self, field="state", dim=0, i=-1):
-        return plot_distribution(self.history[i], field, dim)
-
-    def plot_series_analysis(self):
+    def plot_series_diag(self):
         """ plot things like epsilon and so on
         """
         epsilon = np.array([e.analysis['epsilon'] for e in self.history])
@@ -366,37 +359,65 @@ class Diagnostic(object):
         plt.ylabel("id in the ensemble")
         return _
 
-    def plot_traceback_param(self, param_id=None, model_id=None, target_iter=-1, **kwargs):
-        ni, n, p, m = self.get_dimensions()
-        # param(s) to trace back
-        if param_id is None:
-            p_ids = np.arange(p)
-        else:
-            p_ids = [param_id]
-        # model(s) to trace back
-        if model_id is None:
-            m_ids = np.arange(n)
-        elif np.iterable(model_id):
-            m_ids = model_id
-        else:
-            m_ids = [model_id]
-        ids = self.traceback_ids(target_iter)
-        params = self.get_params(trace_ids=ids, param_ids=p_ids)
-        # 3-D ndarray of params ( param x iter x ensemble)
-
-        figlines = []
-        
-        for pid in p_ids:
-            plt.figure()
-            lines = []
-            for m in m_ids:
-                line = plt.plot(params[pid][:, m], label=m, **kwargs)
-                lines.append(line)
-            figlines.append(lines)
-            plt.title("Particle history w.r.t to param {}".format(self.labels_params[pid]))
-            plt.xlabel("Iteration number")
-            plt.ylabel("Param value (?)")
-            if len(m_ids) <= 10:
-                plt.legend(frameon=False)
-
-        return figlines
+    # def get_params(self, param_ids=None, trace_ids=None):
+    #     """Series of params
+    #
+    #     Parameters
+    #     ----------
+    #     param_ids: 1-D int array, optional
+    #         subset of parameters to retrieve (default: all)
+    #     trace_ids: 2-D int array, optional ( iter x ids )
+    #         mapping of the particle at the last iteration (or before) 
+    #         onto the ensembles of previous iterations.
+    #         See traceback_ids.
+    #
+    #     Returns
+    #     -------
+    #     3-D ndarray of params ( param x iter x ensemble)
+    #     """
+    #     ni, n, p, m = self.get_dimensions()
+    #     if param_ids is None: # params' index
+    #         param_ids = np.arange(p, dtype=int)
+    #     if trace_ids is None: # ensemble's index
+    #         # by default just assumes the particles remain the same...
+    #         trace_ids = np.arange(n, dtype=int)[np.newaxis, :].repeat(ni, axis=1)
+    #     params = np.empty((len(param_ids), trace_ids.shape[0], trace_ids.shape[1])) 
+    #     for i in xrange(trace_ids.shape[0]):
+    #         params[:,i,:] = self.history[i].params[trace_ids[i], param_ids].T
+    #     return params
+    #
+    #
+    # def plot_traceback_param(self, param_id=None, model_id=None, target_iter=-1, **kwargs):
+    #     ni, n, p, m = self.get_dimensions()
+    #     # param(s) to trace back
+    #     if param_id is None:
+    #         p_ids = np.arange(p)
+    #     else:
+    #         p_ids = [param_id]
+    #     # model(s) to trace back
+    #     if model_id is None:
+    #         m_ids = np.arange(n)
+    #     elif np.iterable(model_id):
+    #         m_ids = model_id
+    #     else:
+    #         m_ids = [model_id]
+    #     ids = self.traceback_ids(target_iter)
+    #     params = self.get_params(trace_ids=ids, param_ids=p_ids)
+    #     # 3-D ndarray of params ( param x iter x ensemble)
+    #
+    #     figlines = []
+    #     
+    #     for pid in p_ids:
+    #         plt.figure()
+    #         lines = []
+    #         for m in m_ids:
+    #             line = plt.plot(params[pid][:, m], label=m, **kwargs)
+    #             lines.append(line)
+    #         figlines.append(lines)
+    #         plt.title("Particle history w.r.t to param {}".format(self.labels_params[pid]))
+    #         plt.xlabel("Iteration number")
+    #         plt.ylabel("Param value (?)")
+    #         if len(m_ids) <= 10:
+    #             plt.legend(frameon=False)
+    #
+    #     return figlines
