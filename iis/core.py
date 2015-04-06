@@ -548,6 +548,20 @@ class Ensemble(object):
 
         return covjitter # for the record only
 
+    def to_dataframe(self, params_ids=None, state_ids=None, categories=None, class_column='_CatName'):
+        """ Wrapper around `iis.diagnostic.ensemble_to_dataframe`
+        """
+        from .diagnostic import ensemble_to_dataframe
+        return ensemble_to_dataframe(self, params_ids, state_ids, categories, class_column)
+
+    def scatter_matrix(self, params_ids=None, state_ids=None, **kwargs):
+        """ Wrapper around ensemble.to_dataframe and pandas.scatter_matrix
+        """
+        import pandas as pd
+        df = self.to_dataframe(params_ids, state_ids)
+        pd.scatter_matrix(df, **kwargs)
+
+
 class IIS(object):
     """ Solver for Iterative Importance Sampling
     """
@@ -691,6 +705,37 @@ doing the analysis to get meaningful results")
 
         return self.ensemble
 
+    #
+    # Some diagnostics
+    #
+    def to_panel(self, params_ids=None, state_ids=None, quantiles=None):
+        """ Wrapper around `iis.diagnostic.history_to_panel`
+        """
+        from .diagnostic import history_to_panel
+        return history_to_panel(self.history, params_ids, state_ids, quantiles)
+
+    def plot_history(self, params_ids=None, state_ids=None, quantiles=(0.5, 0.95, 0.05, 0.16, 0.84), overlay_dists=False, **kwargs):
+        """ Plot convergence of the ensemble (wrapper around `iis.diagnostic.plot_iterations`)
+
+        Parameters
+        ----------
+        ensembles : list of Ensemble instances (iterations)
+        params_ids : indexing array, optional
+            model parameters to include (default to all)
+        state_ids : indexing array, optional
+            model state variables to include (default to all)
+        quantiles : list of floats in [0,1], optional 
+            (default is [0.5, 0.95, 0.05, 0.16, 0.84] )
+        overlay_dists : bool, optional
+            if True, overlay prior and likelihood distributions onto the convergence plots
+            Default to False.
+
+        See also
+        --------
+        `iis.Ensemble.scatter_matrix`
+        """
+        from .diagnostic import plot_iterations
+        return plot_iterations(self.history, params_ids, state_ids, quantiles, overlay_dists, **kwargs)
 
 # def main():
 #     pass
