@@ -679,8 +679,8 @@ doing the analysis to get meaningful results")
 
         i = 0
         while True:
-            alpha = 0 if self.ensemble.analysis is None else self.ensemble.analysis['alpha']
-            if alpha > alpha_target:
+            # alpha = 0 if self.ensemble.analysis is None else self.ensemble.analysis['alpha']
+            if self.ensemble.alpha > alpha_target:
                 logging.info("Estimation over (alpha_target reached).")
                 break
             if maxiter is not None and i >= maxiter:
