@@ -1,6 +1,6 @@
 IIS
 ===
-__Iterative Importance Sampling (IIS) for bayesian parameter estimation of physical models__
+Iterative Importance Sampling (IIS) for bayesian parameter estimation of physical models
 
 Background
 ----------
