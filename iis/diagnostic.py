@@ -1,9 +1,120 @@
 """ Make various diagnostic of model convergence and so on
 """
 import numpy as np
+import pandas as pd  # some plots are based on pandas
+from pandas import DataFrame, Series
+import pandas.tools.plotting as pdplt
+# from pandas.tools.plotting import scatter_matrix, andrews_curves, parallel_coordinates, radviz
 import matplotlib.pyplot as plt
 
-__all__ = ['plot_distribution', 'Diagnostic']
+##########################################
+# Wrapper around Pandas plotting functions
+##########################################
+def ensemble_to_df(ensemble, params_ids=None, state_ids=None, categories=None):
+    """ Transform an Ensemble instance into pandas' DataFrame
+
+    Parameters
+    ----------
+    ensemble : `iis.Ensemble` instance
+    params_ids : list of int, optional
+        parameters to include in the df (default to all)
+    state_ids : list of int, optional
+        model state to include in the df (default to all)
+    categories : list of str, optional
+        class names to cluster the data (must match ensemble size)
+        Will be added as a '_CatName' column.
+
+    Returns
+    -------
+    `pandas.DataFrame` instance
+    """
+    if params_ids is None:
+        params_ids = range(ensemble.model.params.size)
+    if state_ids is None:
+        state_ids = range(ensemble.model.state.size)
+    # aggregate all data
+    datasets = []
+    labels = []
+    for i in params_ids:
+        datasets.append(ensemble.params[:, i])
+        labels.append(ensemble.model.labels_params[i])
+    for i in state_ids:
+        datasets.append(ensemble.state[:, i])
+        labels.append(ensemble.model.labels_state[i])
+
+    df = DataFrame(np.asarray(datasets).T, columns=labels)
+
+    # add categories
+    if categories is not None:
+        assert len(categories) == ensemble.size, 'categories must match ensemble size'
+        # idx_check = np.arange(len(datasets))
+        cat = DataFrame({'_CatName':Series(categories)})
+        df = df.join(cat)
+
+    return df
+
+def scatter_matrix(ensemble, params_ids=None, state_ids=None, **kwargs):
+    """Wrapper for pandas' scatter_matrix
+
+    Parameters
+    ----------
+    ensemble : Ensemble instance
+    params_ids : list of int, optional
+        parameters to be present on the plot (default to all)
+    state_ids : list of int, optional
+        model state to be present on the plot (default to all)
+    **kwargs : passed to `pandas.scatter_matrix`
+    """
+    df = ensemble_to_df(ensemble, params_ids, state_ids)
+    return pdplt.scatter_matrix(df, **kwargs)
+
+def parallel_coordinates(ensemble, categories, params_ids=None, state_ids=None, **kwargs):
+    """Wrapper for pandas' parallel_coordinates
+
+    Parameters
+    ----------
+    ensemble : Ensemble instance
+    categories : list of class names to cluster the data (must match ensemble size)
+    params_ids : list of int, optional
+        parameters to be present on the plot (default to all)
+    state_ids : list of int, optional
+        model state to be present on the plot (default to all)
+    **kwargs : passed to `pandas.parallel_coordinates`
+    """
+    df = ensemble_to_df(ensemble, params_ids, state_ids, categories=categories)
+    return pdplt.parallel_coordinates(df, '_CatName', **kwargs)
+
+def andrews_curves(ensemble, categories, params_ids=None, state_ids=None, **kwargs):
+    """Wrapper for pandas' andrews_curves
+
+    Parameters
+    ----------
+    ensemble : Ensemble instance
+    categories : list of class names to cluster the data (must match ensemble size)
+    params_ids : list of int, optional
+        parameters to be present on the plot (default to all)
+    state_ids : list of int, optional
+        model state to be present on the plot (default to all)
+    **kwargs : passed to `pandas.andrews_curves`
+    """
+    df = ensemble_to_df(ensemble, params_ids, state_ids, categories=categories)
+    return pdplt.andrews_curves(df, '_CatName', **kwargs)
+
+def radviz(ensemble, categories, params_ids=None, state_ids=None, **kwargs):
+    """Wrapper for pandas' radviz
+
+    Parameters
+    ----------
+    ensemble : Ensemble instance
+    categories : list of class names to cluster the data (must match ensemble size)
+    params_ids : list of int, optional
+        parameters to be present on the plot (default to all)
+    state_ids : list of int, optional
+        model state to be present on the plot (default to all)
+    **kwargs : passed to `pandas.radviz`
+    """
+    df = ensemble_to_df(ensemble, params_ids, state_ids, categories=categories)
+    return pdplt.radviz(df, '_CatName', **kwargs)
 
 def plot_distribution(ensemble, field="state", dim=0):
     """ Plot ensemble distributions
@@ -137,12 +248,12 @@ class Diagnostic(object):
             data[i] = np.percentile(getattr(ens, field)[:, dim], pct)
             
         x = np.arange(n)
-        f90 = plt.fill_between(x, data[:, 1], data[:, 2], alpha=0.2)
-        f67 = plt.fill_between(x, data[:, 3], data[:, 4], alpha=0.5)
-        l50 = plt.plot(x, data[:, 0], label="model")
+        f90 = ax.fill_between(x, data[:, 1], data[:, 2], alpha=0.2)
+        f67 = ax.fill_between(x, data[:, 3], data[:, 4], alpha=0.5)
+        l50 = ax.plot(x, data[:, 0], label="model")
 
-        plt.xlabel("Iteration number")
-        plt.ylabel("{}[{}]".format(field, dim))
+        ax.set_xlabel("Iteration number")
+        ax.set_ylabel("{}[{}]".format(field, dim))
         # plt.ylabel("")
 
         return {'median':l50, '67%':f67, '90%':f90, 'pct':pct}
@@ -176,13 +287,14 @@ class Diagnostic(object):
 
             # overlay prior, if any
             if self.model.prior:
-                mi, ma = ax.get_xlim()
+                # mi, ma = ax.get_xlim()
+                mi, ma = 0, len(self.history)
                 over = self.model.prior.ppf(np.array(pct)/100.) # quantiles
-                plt.hlines(over[0, i], mi, ma, linestyle='-', label='prior', color='red')
-                plt.hlines(over[[1,2], i], mi, ma, linestyle=':', color='red')
-                plt.hlines(over[[3,4], i], mi, ma, linestyle='--', color='red')
-                plt.xlim([mi, ma])
-            plt.legend(frameon=False)
+                ax.hlines(over[0, i], mi, ma, linestyle='-', label='prior', color='red')
+                ax.hlines(over[[1,2], i], mi, ma, linestyle=':', color='red')
+                ax.hlines(over[[3,4], i], mi, ma, linestyle='--', color='red')
+                ax.set_xlim([mi, ma])
+            ax.legend(frameon=False)
 
     def plot_distribution(self, field="state", dim=0, i=-1):
         return plot_distribution(self.history[i], field, dim)
