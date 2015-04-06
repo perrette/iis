@@ -21,51 +21,51 @@ Define some model to estimate.
 
 - a forward function to integrate the model:
 
-    def mymodel(params):
-        """ User-defined model with two parameters
+        def mymodel(params):
+            """User-defined model with two parameters
 
-        Parameters
-        ----------
-        params : numpy.ndarray 1-D
+            Parameters
+            ----------
+            params : numpy.ndarray 1-D
 
-        Returns
-        -------
-        state : float
-            return value (could also be an array)
-        """
-        return params[0] + params[1]*2
+            Returns
+            -------
+            state : float
+                return value (could also be an array)
+            """
+            return params[0] + params[1]*2
 
 - distributions that represent prior knowledge on model parameter
   and likelihood functions, using `scipy.stats` distributions:
 
-    from scipy.stats import norm, uniform
-    likelihood = norm(loc=1, scale=1)  # normal, univariate distribution mean 1, s.d. 1
-    prior = [norm(loc=0, scale=10), uniform(loc=-10, scale=20)] 
+        from scipy.stats import norm, uniform
+        likelihood = norm(loc=1, scale=1)  # normal, univariate distribution mean 1, s.d. 1
+        prior = [norm(loc=0, scale=10), uniform(loc=-10, scale=20)] 
 
 - Use `iis` to estimate parameters and state:
 
-    from iis import IIS, Model
-    model = Model(mymodel, likelihood, prior=prior)  # define the model 
-    solver = IIS(model)
-    ensemble = solver.estimate(size=500)
+        from iis import IIS, Model
+        model = Model(mymodel, likelihood, prior=prior)  # define the model 
+        solver = IIS(model)
+        ensemble = solver.estimate(size=500)
     
 - Check convergence
 
-    from iis.diagnostic import Diagnostic, plot_ensemble
+        from iis.diagnostic import Diagnostic, plot_ensemble
 
-    # posterior distribution for model state
-    plot_ensemble(ensemble, field='state') 
+        # posterior distribution for model state
+        plot_ensemble(ensemble, field='state') 
 
-    # posterior distribution for model params
-    plot_ensemble(ensemble, field='params', dim=0) 
-    plot_ensemble(ensemble, field='params', dim=1)
+        # posterior distribution for model params
+        plot_ensemble(ensemble, field='params', dim=0) 
+        plot_ensemble(ensemble, field='params', dim=1)
 
-    # also check convergence history
-    diag = Diagnostic(solver.history)
-    diag.plot_series_state()
+        # also check convergence history
+        diag = Diagnostic(solver.history)
+        diag.plot_series_state()
 
 
 Install
 =======
 From within the cloned repository:
-    python setup.py install
+        python setup.py install
