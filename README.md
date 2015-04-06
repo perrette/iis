@@ -1,10 +1,13 @@
 IIS
 ===
-Iterative Importance Sampling (IIS) for parameter estimation of physical models
-in a Bayesian sense. The current version of this package is based on Annan and 
+Iterative Importance Sampling (IIS) for bayesian parameter estimation of physical models
+
+The current version of this package is based on Annan and 
 Hargreave (2010), DOI: 10.1016/j.ocemod.2010.02.003
 
-This module has some bearing with pymc but focus on relatively computationally-
+See and download notebooks for [IIS concept](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb) and [examples](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb).
+
+This module has some bearing with pymc but focuses on relatively computationally-
 expensive physical models. It is based on Gaussian approximation of parameter
 distribution and resulting model state, but is more robust than the Ensemble 
 Kalman Filter with respect to deviations from non-linearity (Annan and Hargreave, 2010)
@@ -57,24 +60,20 @@ Define some model to estimate.
         ensemble.scatter_matrix()
 
 
-Check in-line help for more option on `iis.IIS.estimate`, `iis.Model` and so on.
-The concept of IIS is explained in [notebooks/iis_concept.ipynb](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/iis_concept.ipynb)
-and an example can be found in [notebooks/examples.ipynb](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb)
+Check in-line help for more option on `iis.IIS.estimate`, `iis.Model` and so on as well as [notebook examples](http://nbviewer.ipython.org/github/perrette/iis/blob/master/notebooks/examples.ipynb)
 
 
 Dependencies
-============
+------------
 
-Required
---------
-numpy (tested with 1.9.2) 
-scipy (tested with 0.15.1)
+- Required:
+        - numpy (tested with 1.9.2) 
+        - scipy (tested with 0.15.1)
 
-Optional
---------
-pandas (plotting only) (tested with 0.15.2)
+- Optional:
+        - pandas (plotting only) (tested with 0.15.2)
 
 Install
-=======
+-------
 
 python setup.py install
